@@ -34,10 +34,15 @@ export async function createInvoice(formData: FormData) {
   const date = new Date().toISOString().split('T')[0]; // e.g., "2025-06-19"
 
   // 🗃 Insert new invoice
+  try{
   await sql`
     INSERT INTO invoices (customer_id, amount, status, date)
     VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
+  `;}
+  catch (error) {
+    console.error('Error inserting invoice:', error);
+    throw new Error('Failed to create invoice');
+  }
 
   // 🔄 Revalidate and redirect
   revalidatePath('/dashboard/invoices');
@@ -60,11 +65,17 @@ export async function updateInvoice(id: string, formData: FormData) {
   const amountInCents = amount * 100;
 
   // 🛠 Update existing invoice
+  try{
   await sql`
     UPDATE invoices
     SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
     WHERE id = ${id}
   `;
+}
+  catch (error) {
+    console.error('Error updating invoice:', error);
+    throw new Error('Failed to update invoice');
+  }
 
   // 🔄 Revalidate and redirect
   revalidatePath('/dashboard/invoices');
@@ -72,6 +83,7 @@ export async function updateInvoice(id: string, formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
+  // throw new Error('Failed to Delete Invoice');
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath('/dashboard/invoices');
 }
